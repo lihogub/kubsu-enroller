@@ -171,6 +171,10 @@ function App() {
         fontSize: 16
     }
 
+    const selectedToDirection = (_selected) => {
+        return [null, "mathobes", "fundam", "applied", "inform"][_selected-1]
+    }
+
   return (
     <div className="App">
         <div>
@@ -184,6 +188,7 @@ function App() {
         <table style={tStyle}>
             <tr>
                 <td style={tStyle}>№</td>
+                <td style={tStyle}>#</td>
                 <td style={tStyle}>СНИЛС</td>
                 <td style={(selected === 1) ? selStyle : tStyle}>
                     <button children={"БАЛЛЫ"} onClick={()=>onClick(null, 1)} />
@@ -204,10 +209,19 @@ function App() {
             {
                 DB.commonList
                     .filter(u => u.shown)
+                    .map((u, idx, arr)=>{
+                        let prev_place = 0
+                        if (idx !== 0) {
+                            prev_place = arr[idx-1].place
+                        }
+                        u.place = (u[selectedToDirection(selected)] === true) ? prev_place + 1 : prev_place
+                        return u
+                    })
                     .map(
                     (u, idx) => (
                         <tr style={(searched.some(t=>t.id===u.id))? selStyle : tStyle} id={u.id} key={u.id}>
                             <td style={tStyle}>{idx+1}</td>
+                            <td style={tStyle}>{u[selectedToDirection(selected)] && u.place}</td>
                             <td style={tStyle}>{u.id}</td>
                             <td style={(selected === 1) ? selStyle : tStyle}>{u.score}</td>
                             <td style={(selected === 2) ? selStyle : tStyle}>{stateToString(u.mathobes)}</td>
