@@ -42,6 +42,7 @@ const addToCommon = (user, direction) => {
         }
     }
     DB.common[user.id][direction] = user.agree
+    DB.common[user.id].score = Math.max(DB.common[user.id].score, user.score)
 }
 
 const process = (html, callback, direction) => {
