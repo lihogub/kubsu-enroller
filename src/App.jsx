@@ -18,6 +18,7 @@ const DB = {
 }
 
 const merge = () => {
+    console.log("merge")
     DB.mathobes.forEach(u => addToCommon(u, "mathobes"))
     DB.fundam.forEach(u => addToCommon(u, "fundam"))
     DB.applied.forEach(u => addToCommon(u, "applied"))
@@ -72,7 +73,7 @@ const process = (html, callback, direction) => {
 
         return curr
     })
-
+    merge()
     callback(direction)
 }
 
@@ -122,7 +123,6 @@ function App() {
         getData(FUNDAM, "fundam", useLol)
     }, [])
 
-    merge()
     console.log(DB)
 
 
@@ -166,8 +166,9 @@ function App() {
         position: "fixed",
         display: "block",
         width: 350,
-        height: 20,
-        margin: 10
+        height: 30,
+        margin: 10,
+        fontSize: 16
     }
 
   return (
@@ -177,6 +178,7 @@ function App() {
                    placeholder={"Искать по СНИЛС"}
                    onChange={(e) => setSearch(e.target.value)} style={inputStyle}/>
         </div>
+        <br/>
         <br/>
         <br/>
         <table style={tStyle}>
