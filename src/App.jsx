@@ -1,6 +1,7 @@
 import './App.css';
 import {useEffect, useRef, useState} from "react";
 import axios from "axios";
+import {findDOMNode} from "react-dom";
 
 const MATHOBES = "http://ftp.kubsu.ru/ranged/02.03.03_792_ofo_b.html"
 const INFORM = "http://ftp.kubsu.ru/ranged/09.03.03_793_ofo_b.html"
@@ -61,7 +62,6 @@ const process = (html, callback, direction) => {
         }).reduce((p, c)=> Math.max(p, c), 0)
 
         let agree = row.match(/(Есть)|(Нет)/g)[0]
-        console.log(id, score, agree)
 
         DB[direction] = [...DB[direction], {
             id: id,
@@ -69,11 +69,11 @@ const process = (html, callback, direction) => {
             agree: (agree === "Есть")
         }]
 
-        callback(direction)
+
         return curr
     })
 
-    callback("OK")
+    callback(direction)
 }
 
 const makeUrl = (url) => {
@@ -125,6 +125,32 @@ function App() {
     merge()
     console.log(DB)
 
+
+
+    const onClick = (direction, directionId) => {
+        sortBy(direction, useLol)
+        setSelected(directionId)
+    }
+
+    const [search, setSearch] = useState("")
+    const [searched, setSearched] = useState([])
+
+    useEffect(()=>{
+        let _searched = []
+        if (search.length > 2)
+            _searched = DB.commonList
+                .filter(u=>u.id.includes(search))
+        setSearched(_searched)
+    }, [search])
+
+    useEffect(()=>{
+        if (searched.length > 0)
+            setTimeout(() => {
+                const el = document.getElementById(searched[0].id)
+                if (el !== null) el.scrollIntoView({block: "center", behavior:"smooth"})
+            })
+    }, [lol, searched])
+
     const tStyle = {
         borderCollapse: "collapse",
         border: "1px solid",
@@ -136,38 +162,49 @@ function App() {
         background: "lightgray",
     }
 
-    const onClick = (direction, directionId) => {
-        sortBy(direction, useLol)
-        setSelected(directionId)
+    const inputStyle = {
+        position: "fixed",
+        display: "block",
+        width: 350,
+        height: 20,
+        margin: 10
     }
 
   return (
     <div className="App">
+        <div>
+            <input value={search}
+                   placeholder={"Искать по СНИЛС"}
+                   onChange={(e) => setSearch(e.target.value)} style={inputStyle}/>
+        </div>
+        <br/>
+        <br/>
         <table style={tStyle}>
-            <td style={tStyle}>№</td>
-            <td style={tStyle}>СНИЛС</td>
-            <td style={(selected === 1) ? selStyle : tStyle}>
-                <button children={"БАЛЛЫ"} onClick={()=>onClick(null, 1)} />
-            </td>
-            <td style={(selected === 2) ? selStyle : tStyle}>
-                <button children={"МОАИС"} onClick={()=>onClick("mathobes", 2)}/>
-            </td>
-            <td style={(selected === 3) ? selStyle : tStyle}>
-                <button children={"ФИИТ"} onClick={()=>onClick("fundam", 3)}/>
-            </td>
-            <td style={(selected === 4) ? selStyle : tStyle}>
-                <button children={"ПМИ"} onClick={()=>onClick("applied", 4)}/>
-            </td>
-            <td style={(selected === 5) ? selStyle : tStyle}>
-                <button children={"ПИ"} onClick={()=>onClick("inform", 5)}/>
-            </td>
-
+            <tr>
+                <td style={tStyle}>№</td>
+                <td style={tStyle}>СНИЛС</td>
+                <td style={(selected === 1) ? selStyle : tStyle}>
+                    <button children={"БАЛЛЫ"} onClick={()=>onClick(null, 1)} />
+                </td>
+                <td style={(selected === 2) ? selStyle : tStyle}>
+                    <button children={"МОАИС"} onClick={()=>onClick("mathobes", 2)}/>
+                </td>
+                <td style={(selected === 3) ? selStyle : tStyle}>
+                    <button children={"ФИИТ"} onClick={()=>onClick("fundam", 3)}/>
+                </td>
+                <td style={(selected === 4) ? selStyle : tStyle}>
+                    <button children={"ПМИ"} onClick={()=>onClick("applied", 4)}/>
+                </td>
+                <td style={(selected === 5) ? selStyle : tStyle}>
+                    <button children={"ПИ"} onClick={()=>onClick("inform", 5)}/>
+                </td>
+            </tr>
             {
                 DB.commonList
                     .filter(u => u.shown)
                     .map(
                     (u, idx) => (
-                        <tr style={tStyle}>
+                        <tr style={(searched.some(t=>t.id===u.id))? selStyle : tStyle} id={u.id} key={u.id}>
                             <td style={tStyle}>{idx+1}</td>
                             <td style={tStyle}>{u.id}</td>
                             <td style={(selected === 1) ? selStyle : tStyle}>{u.score}</td>
